@@ -306,42 +306,21 @@
             box-shadow: 0 0 8px #000000aa;
             padding: 4px;
             flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
         }
         .roulette-item.winner-highlight {
             border-color: #ffd966;
             box-shadow: 0 0 25px #ffb347, 0 0 10px #ffd966 inset;
             background: linear-gradient(145deg, #2a2a10, #1a1a08);
         }
-        
-        /* Картинка скина */
-        .skin-img {
-            width: 80px;
-            height: 60px;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 6px black);
-            transition: 0.2s;
-            pointer-events: none;
-        }
-        .roulette-item .emoji-fallback {
-            font-size: 2.2rem;
-            line-height: 1;
-            filter: drop-shadow(0 4px 6px black);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 60px;
-        }
-
+        .roulette-item .emoji { font-size: 2.2rem; line-height: 1; filter: drop-shadow(0 4px 6px black); }
         .roulette-item .weapon-name {
-            font-size: 0.55rem; color: #b8ccf0; text-align: center;
+            font-size: 0.6rem; color: #b8ccf0; text-align: center;
             font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
-            margin-top: 2px; line-height: 1.1; max-width: 100px;
+            margin-top: 4px; line-height: 1.1; max-width: 100px;
             word-break: break-word; overflow: hidden; text-overflow: ellipsis;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
-        .roulette-item .weapon-price { font-size: 0.6rem; color: #ffd966; font-weight: 800; margin-top: 1px; }
+        .roulette-item .weapon-price { font-size: 0.65rem; color: #ffd966; font-weight: 800; margin-top: 2px; }
 
         .center-marker {
             position: absolute;
@@ -380,9 +359,6 @@
             box-shadow: 0 0 25px #ffb347, 0 6px 0 #03060a;
             min-width: 200px;
             transition: 0.15s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .result-card .slot-owner {
             font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
@@ -474,24 +450,9 @@
             display: flex; flex-direction: column; align-items: center;
             border: 1px solid #2e415a; position: relative;
             box-shadow: 0 3px 0 #03060a;
-            transition: 0.15s;
         }
         .inventory-item:hover { border-color: #ffb347; box-shadow: 0 0 12px #ffb34760; }
-        
-        .inv-img-wrapper {
-            width: 60px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .inv-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 3px 4px black);
-        }
-        
+        .inv-emoji { font-size: 1.7rem; line-height: 1; filter: drop-shadow(0 3px 4px black); }
         .inv-name {
             font-size: 0.55rem; font-weight: 700; color: #b8ccf0;
             text-align: center; text-transform: uppercase; margin-top: 3px;
@@ -598,7 +559,7 @@
         }
         .ach-toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* Терминал */
+        /* Стили для терминала */
         .terminal-modal {
             max-width: 500px;
         }
@@ -651,17 +612,7 @@
             border: 2px solid #3c5777;
             width: 100%;
         }
-        .term-item-preview .skin-img {
-            width: 120px;
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 6px;
-            filter: drop-shadow(0 4px 6px black);
-        }
-        .term-item-preview .emoji {
-            font-size: 3rem;
-            margin-bottom: 6px;
-        }
+        .term-item-preview .emoji { font-size: 3rem; margin-bottom: 6px; }
         .term-item-preview .name { font-size: 0.85rem; font-weight: 800; color: #d4e2ff; text-transform: uppercase; line-height: 1.2; }
         .term-item-preview .price { font-size: 1rem; font-weight: 900; color: #ffd966; margin-top: 4px; }
         .term-offer-box {
@@ -736,7 +687,7 @@
         <div class="result-display">
             <div class="result-card" id="resultCard">
                 <div class="slot-owner">Ваш выигрыш</div>
-                <div id="resultAvatarWrapper"><div class="slot-avatar" id="resultAvatar">🤖</div></div>
+                <div class="slot-avatar" id="resultAvatar">🤖</div>
                 <div class="slot-item" id="resultItemName">—</div>
             </div>
         </div>
@@ -826,166 +777,7 @@
                 [784, 1046.5, 1318.5, 1568].forEach((f, i) => playTone(f, 0.2, 'triangle', 0.1, i * 0.08));
             }
 
-            // ==================== БАЗА ПРЕДМЕТОВ (с реальными картинками) ====================
-            // Функция для генерации URL картинки с CSGOStash
-            function getSkinImageUrl(id) {
-                // Используем бесплатный CDN от CSGOStash (без ключа)
-                // Если картинка не загрузится, сработает onerror и покажет эмодзи
-                const base = 'https://csgostash.com/img/skins/';
-                // В реальной жизни тут должен быть маппинг ID -> хеш картинки.
-                // Но так как у нас нет точных хешей, я использую Steam CDN с прямыми ссылками на популярные скины.
-                // Для надежности, если картинка не загрузится — фолбэк на эмодзи.
-                // В данном примере я захардкодил несколько прямых ссылок со Steam CDN для демонстрации.
-                // ВАЖНО: В реальном проекте лучше использовать API, но здесь мы используем прямые ссылки, 
-                // которые работают и не требуют ключей.
-                
-                // Маппинг ID -> прямая ссылка (использую Steam CDN, который открыт)
-                const map = {
-                    // Ножи
-                    'k1': 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRv49f6S0T1JxNz5Zg7L2ZExn0v33fi9B78niq4zVz_akhfnI2T8B6sF0i7rEo9T00Fbs6kZpMW3gJ8jLc1ppwGY8gQ/360fx360f',
-                    'k2': 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRv49f6S0T1JxNz5Zg7L2ZExn0v33fi9B78niq4zVz_akhfnI2T8B6sF0i7rEo9T00Fbs6kZpMW3gJ8jLc1ppwGY8gQ/360fx360f', // Заглушка
-                    // ... (в реальном проекте нужно прописать все 85 ID)
-                };
-                
-                // Для демонстрации я использую публичный сервис, который отдает картинки по имени.
-                // Но так как имена разные, я использую простую заглушку.
-                // ЧТОБЫ НЕ ЛОМАТЬ ИГРУ, Я СДЕЛАЮ ТАК: если картинка не загрузится, покажется эмодзи.
-                // В реальном коде тут был бы API запрос.
-                
-                // Возвращаем прямую ссылку на Steam CDN для демонстрации (несколько популярных скинов)
-                // В реальном проекте нужно использовать полный маппинг.
-                return 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRv49f6S0T1JxNz5Zg7L2ZExn0v33fi9B78niq4zVz_akhfnI2T8B6sF0i7rEo9T00Fbs6kZpMW3gJ8jLc1ppwGY8gQ/360fx360f';
-            }
-
-            // Вместо этого я использую подход с реальными именами картинок из открытого API.
-            // НО чтобы не сломать игру, я оставлю эмодзи как фолбэк, а картинки буду брать с бесплатного CDN.
-            // Поскольку я не могу гарантировать стабильность внешних ссылок, 
-            // я сделаю так: если картинка не грузится, показывается эмодзи.
-            
-            // Для простоты я использую заглушки-картинки (можно заменить на свои).
-            // Но чтобы ты увидел реальные картинки, я использую сервис placeholder с текстом скина.
-            // ЛУЧШЕЕ РЕШЕНИЕ: я оставлю эмодзи, но сделаю их большими и красивыми, 
-            // а если хочешь реальные картинки — тебе нужно будет добавить свой CDN.
-            
-            // НО! Я нашел рабочий бесплатный CDN: https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/
-            // Он открыт и не требует ключей.
-            
-            function getRealSkinImageUrl(id) {
-                // Маппинг ID -> имя файла на GitHub (ByMykel/CSGO-API)
-                const imageMap = {
-                    'k1': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_karambit_fade.png',
-                    'k2': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_butterfly_sapphire.png',
-                    'k3': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_bayonet_slaughter.png',
-                    'k4': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_karambit_doppler_phase2.png',
-                    'k5': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_butterfly_marble_fade.png',
-                    'k6': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_tanto_crimson_web.png',
-                    'k7': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_bayonet_damascus_steel.png',
-                    'k8': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_tanto_fade.png',
-                    'k9': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_karambit_slaughter.png',
-                    'k10': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_butterfly_fade.png',
-                    'g1': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/sporty_gloves_cobalt_skulls.png',
-                    'g2': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/driver_gloves_king_snake.png',
-                    'g3': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/specialist_gloves_british_commando.png',
-                    'g4': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/hand_wraps_mandarin.png',
-                    'g5': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/tactical_gloves_bloodhound.png',
-                    'g6': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/sporty_gloves_amphibious.png',
-                    'g7': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/driver_gloves_emerald.png',
-                    'g8': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/specialist_gloves_tiger.png',
-                    'g9': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/hand_wraps_moonlight.png',
-                    'g10': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/gloves/tactical_gloves_blue.png',
-                    'a1': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/agents/agent_sir_bloody_miami.png',
-                    'a2': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/agents/agent_ava.png',
-                    'a3': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/agents/agent_biohazard.png',
-                    'w1': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_hydra.png',
-                    'w2': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_fire.png',
-                    'w3': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_redline.png',
-                    'w4': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_neon.png',
-                    'w5': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_asiimov.png',
-                    'w6': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_crimson_web.png',
-                    'w7': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_sapphire.png',
-                    'w8': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_ruby.png',
-                    'w9': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_emerald.png',
-                    'w10': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_autotronic.png',
-                    'w11': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_waves.png',
-                    'w12': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_damascus.png',
-                    'w13': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_slaughter.png',
-                    'w14': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_fade.png',
-                    'w15': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_blue_crystal.png',
-                    'w16': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_asiimov.png',
-                    'w17': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_dragon_lore.png',
-                    'w18': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_electric.png',
-                    'w19': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_neon.png',
-                    'w20': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_crimson_web.png',
-                    'w21': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_sapphire.png',
-                    'w22': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_ruby.png',
-                    'w23': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_emerald.png',
-                    'w24': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_autotronic.png',
-                    'w25': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_waves.png',
-                    'w26': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_damascus.png',
-                    'w27': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_slaughter.png',
-                    'w28': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_fade.png',
-                    'w29': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_blue_crystal.png',
-                    'w30': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_fire.png',
-                    'w31': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_code.png',
-                    'w32': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_asiimov.png',
-                    'w33': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_neon.png',
-                    'w34': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_hydra.png',
-                    'w35': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_fire.png',
-                    'w36': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_crimson_web.png',
-                    'w37': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_sapphire.png',
-                    'w38': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_ruby.png',
-                    'w39': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_emerald.png',
-                    'w40': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_autotronic.png',
-                    'w41': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_frost.png',
-                    'w42': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_gold.png',
-                    'w43': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_blue.png',
-                    'w44': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_hydra.png',
-                    'w45': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_fire.png',
-                    'w46': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_crimson_web.png',
-                    'w47': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_sapphire.png',
-                    'w48': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_ruby.png',
-                    'w49': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_emerald.png',
-                    'w50': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a1s_autotronic.png',
-                    'w51': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_flame.png',
-                    'w52': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_code.png',
-                    'w53': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_gold.png',
-                    'w54': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_hydra.png',
-                    'w55': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_fire.png',
-                    'w56': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_crimson_web.png',
-                    'w57': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_sapphire.png',
-                    'w58': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/deagle_ruby.png',
-                    'w59': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/usp_s_slaughter.png',
-                    'w60': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/usp_s_neon.png',
-                    'w61': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/usp_s_hydra.png',
-                    'w62': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/usp_s_fire.png',
-                    'w63': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/usp_s_crimson_web.png',
-                    'w64': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/usp_s_sapphire.png',
-                    'w65': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/glock_water.png',
-                    'w66': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/glock_neon.png',
-                    'w67': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/glock_hydra.png',
-                    'w68': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/glock_fire.png',
-                    'w69': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/glock_crimson_web.png',
-                    'w70': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/famas_rollan.png',
-                    'w71': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/famas_neon.png',
-                    'w72': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/famas_hydra.png',
-                    'w73': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/mp9_storm.png',
-                    'w74': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/mp9_neon.png',
-                    'w75': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/mp9_hydra.png',
-                    'w76': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ssg08_blood.png',
-                    'w77': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ssg08_neon.png',
-                    'w78': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ssg08_hydra.png',
-                    'w79': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/p90_asiimov.png',
-                    'w80': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/p90_neon.png',
-                    'w81': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/ak47_emerald_dragon.png',
-                    'w82': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/awp_ruby_dragon.png',
-                    'w83': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/weapons/m4a4_sapphire_dragon.png',
-                    'w84': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_karambit_crimson_web.png',
-                    'w85': 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/knives/knife_butterfly_slaughter.png',
-                };
-                return imageMap[id] || null;
-            }
-
-            // Предметы
+            // ==================== БАЗА ПРЕДМЕТОВ ====================
             const ALL_ITEMS = [
                 { id: 'k1', name: 'Керамбит | Градиент', emoji: '🔪', price: 400, type: 'knife' },
                 { id: 'k2', name: 'Нож-бабочка | Сапфир', emoji: '🗡️', price: 600, type: 'knife' },
@@ -1349,12 +1141,14 @@
             let unlockedAchievements = new Set();
             const GOAL_VALUE = 10000;
 
+            // Состояние терминала
             let termMode = 'sell';
             let termOffer = null;
             let termItemIdx = -1;
             let termCooldownEnd = 0;
             let termCooldownInterval = null;
 
+            // DOM
             const balanceDisplay = document.getElementById('balanceDisplay');
             const casesGrid = document.getElementById('casesGrid');
             const rouletteTrack = document.getElementById('rouletteTrack');
@@ -1375,7 +1169,7 @@
             const achievementsBar = document.getElementById('achievementsBar');
             const goalProgress = document.getElementById('goalProgress');
             const achToast = document.getElementById('achToast');
-            const resultAvatarWrapper = document.getElementById('resultAvatarWrapper');
+            const resultAvatar = document.getElementById('resultAvatar');
             const resultItemName = document.getElementById('resultItemName');
 
             const openTerminalBtn = document.getElementById('openTerminalBtn');
@@ -1519,19 +1313,8 @@
                     total += item.price;
                     const div = document.createElement('div');
                     div.className = 'inventory-item';
-                    
-                    const imgUrl = getRealSkinImageUrl(item.id);
-                    let imgHtml;
-                    if (imgUrl) {
-                        imgHtml = `<img src="${imgUrl}" class="inv-img" alt="${item.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'slot-avatar\\' style=\\'font-size:1.8rem\\'>${item.emoji}</div>';">`;
-                    } else {
-                        imgHtml = `<div class="slot-avatar" style="font-size:1.8rem">${item.emoji}</div>`;
-                    }
-
                     div.innerHTML = `
-                        <div class="inv-img-wrapper">
-                            ${imgHtml}
-                        </div>
+                        <div class="inv-emoji">${item.emoji}</div>
                         <div class="inv-name">${item.name}</div>
                         <div class="inv-price">${item.price} ₽</div>
                         <div class="inv-actions">
@@ -1594,17 +1377,8 @@
                     const div = document.createElement('div');
                     div.className = 'roulette-item';
                     div.dataset.itemId = item.id;
-                    
-                    const imgUrl = getRealSkinImageUrl(item.id);
-                    let imgHtml;
-                    if (imgUrl) {
-                        imgHtml = `<img src="${imgUrl}" class="skin-img" alt="${item.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'emoji-fallback\\'>${item.emoji}</div>';">`;
-                    } else {
-                        imgHtml = `<div class="emoji-fallback">${item.emoji}</div>`;
-                    }
-
                     div.innerHTML = `
-                        ${imgHtml}
+                        <div class="emoji">${item.emoji}</div>
                         <div class="weapon-name">${item.name}</div>
                         <div class="weapon-price">${item.price} ₽</div>
                     `;
@@ -1633,17 +1407,8 @@
                         targetIndex = Math.floor(items.length * 0.7);
                         if (items[targetIndex]) {
                             items[targetIndex].dataset.itemId = finalItem.id;
-                            
-                            const imgUrl = getRealSkinImageUrl(finalItem.id);
-                            let imgHtml;
-                            if (imgUrl) {
-                                imgHtml = `<img src="${imgUrl}" class="skin-img" alt="${finalItem.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'emoji-fallback\\'>${finalItem.emoji}</div>';">`;
-                            } else {
-                                imgHtml = `<div class="emoji-fallback">${finalItem.emoji}</div>`;
-                            }
-
                             items[targetIndex].innerHTML = `
-                                ${imgHtml}
+                                <div class="emoji">${finalItem.emoji}</div>
                                 <div class="weapon-name">${finalItem.name}</div>
                                 <div class="weapon-price">${finalItem.price} ₽</div>
                             `;
@@ -1713,20 +1478,12 @@
 
                 buildRouletteStrip(currentCase, 100);
 
-                resultAvatarWrapper.innerHTML = '<div class="slot-avatar">🤖</div>';
+                resultAvatar.textContent = '🤖';
                 resultItemName.textContent = '—';
 
                 await animateRoulette(resultItem);
 
-                const resImgUrl = getRealSkinImageUrl(resultItem.id);
-                let resImgHtml;
-                if (resImgUrl) {
-                    resImgHtml = `<img src="${resImgUrl}" style="width: 100px; height: 70px; object-fit: contain; margin-top: 4px; filter: drop-shadow(0 4px 6px black);" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'slot-avatar\\' style=\\'font-size:2rem\\'>${resultItem.emoji}</div>';">`;
-                } else {
-                    resImgHtml = `<div class="slot-avatar" style="font-size:2rem">${resultItem.emoji}</div>`;
-                }
-                
-                resultAvatarWrapper.innerHTML = resImgHtml;
+                resultAvatar.textContent = resultItem.emoji;
                 resultItemName.textContent = resultItem.name;
 
                 addToInventory(resultItem);
@@ -1764,7 +1521,7 @@
                 renderInventory();
                 renderAchievements();
                 resultMessage.textContent = 'Выбери кейс и нажми «Крутить»';
-                resultAvatarWrapper.innerHTML = '<div class="slot-avatar">🤖</div>';
+                resultAvatar.textContent = '🤖';
                 resultItemName.textContent = '—';
                 rouletteTrack.innerHTML = '';
                 rouletteTrack.style.transform = 'translateX(0px)';
@@ -1882,7 +1639,7 @@
             }
 
             function startCooldown() {
-                termCooldownEnd = Date.now() + 60000;
+                termCooldownEnd = Date.now() + 60000; // 60 секунд
                 saveState();
                 updateCooldownUI();
                 
@@ -1914,6 +1671,7 @@
                 }
             }
 
+            // Режим "Скупщик" (продать)
             function renderSellTerminal() {
                 if (inventory.length === 0) {
                     termContent.innerHTML = `<div class="term-empty">У вас нет предметов для продажи!</div>`;
@@ -1932,17 +1690,9 @@
                 const isGood = multiplier >= 1.0;
                 const remain = getCooldownRemaining();
 
-                const imgUrl = getRealSkinImageUrl(item.id);
-                let imgHtml;
-                if (imgUrl) {
-                    imgHtml = `<img src="${imgUrl}" class="skin-img" alt="${item.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'emoji\\'>${item.emoji}</div>';">`;
-                } else {
-                    imgHtml = `<div class="emoji">${item.emoji}</div>`;
-                }
-
                 termContent.innerHTML = `
                     <div class="term-item-preview">
-                        ${imgHtml}
+                        <div class="emoji">${item.emoji}</div>
                         <div class="name">${item.name}</div>
                         <div class="price">Рыночная цена: ${item.price} ₽</div>
                     </div>
@@ -1990,6 +1740,7 @@
                 });
             }
 
+            // Режим "Барыга" (купить)
             function renderBuyTerminal() {
                 if (!termOffer) {
                     const randomItem = ALL_ITEMS[Math.floor(Math.random() * ALL_ITEMS.length)];
@@ -2003,17 +1754,9 @@
                 const canAfford = balance >= offerPrice;
                 const remain = getCooldownRemaining();
 
-                const imgUrl = getRealSkinImageUrl(item.id);
-                let imgHtml;
-                if (imgUrl) {
-                    imgHtml = `<img src="${imgUrl}" class="skin-img" alt="${item.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'emoji\\'>${item.emoji}</div>';">`;
-                } else {
-                    imgHtml = `<div class="emoji">${item.emoji}</div>`;
-                }
-
                 termContent.innerHTML = `
                     <div class="term-item-preview">
-                        ${imgHtml}
+                        <div class="emoji">${item.emoji}</div>
                         <div class="name">${item.name}</div>
                         <div class="price">Рыночная цена: ${item.price} ₽</div>
                     </div>
